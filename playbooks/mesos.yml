@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+  - name: test connection
+    ping:
+
+  - name: Add key for Mesosphere repository
+    apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0xE56151BF state=present
+
+  - name: Add Oracle PPA to repo
+    apt_repository: repo='ppa:webupd8team/java'
+
+  - name: Add mesosphere.io to apt repo
+    apt_repository: repo='deb http://repos.mesosphere.io/ubuntu trusty main' state=present
+
+  - name: Make sure all apt packages are upgraded
+    apt: update_cache=yes upgrade=yes
+
+  - name: Accept Java 8 License
+    debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+  - name: Install Java 8
+    apt: name={{item}} state=latest
+    with_items:
+      - oracle-java8-installer
+      - ca-certificates
+      - oracle-java8-set-default
+
+- hosts: tag_Name_mesos_master
+  become: yes
+  tasks:
+
+  - name: Install mesosphere
+    apt: name=mesosphere state=present
+
+- hosts: tag_Name_mesos_slave
+  become: yes
+  tasks:
+
+  - name: Install mesos
+    apt: name=mesos state=present

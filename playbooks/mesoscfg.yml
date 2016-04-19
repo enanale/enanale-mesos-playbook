@@ -1,0 +1,82 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+  - name: Set Mesos ZooKeeper URL # used for leader election amongst masters
+    template:
+      src: "./templates/zk.j2"
+      dest: /etc/mesos/zk
+      mode: 0644
+
+- hosts: tag_Name_mesos_master
+  become: yes
+  tasks:
+
+  - name: Set ZooKeeper IDL # used for leader election amongst masters
+    template:
+      src: "./templates/myid.j2"
+      dest: /etc/zookeeper/conf/myid
+      mode: 0644
+
+  - name: Set ZooKeeper config
+    template:
+      src: "./templates/zoo.cfg.j2"
+      dest: /etc/zookeeper/conf/zoo.cfg
+      mode: 0644
+
+  - name: Set quorum size
+    copy:
+      content: "{{ mesos_quorum_count }}"
+      dest: /etc/mesos-master/quorum  
+      mode: 0644
+
+  - name: Set mesos-master IP
+    copy:
+      content: "{{ ansible_default_ipv4.address }}"
+      dest: /etc/mesos-master/ip  
+      mode: 0644
+
+  - name: Set mesos-master hostname
+    copy:
+      content: "{{ ansible_default_ipv4.address }}"
+      dest: /etc/mesos-master/hostname  
+      mode: 0644
+
+  - name: Create marathon conf directory
+    file: path=/etc/marathon/conf state=directory
+
+  - name: Set marathon hostname
+    copy:
+      content: "{{ ansible_default_ipv4.address }}"
+      dest: /etc/marathon/conf/hostname  
+      mode: 0644
+
+  - name: Set marathon ZooKeeper URL # used for leader election amongst masters
+    template:
+      src: "./templates/zk.j2"
+      dest: /etc/marathon/conf/master
+      mode: 0644
+
+  - name: Set marathon ZooKeeper config # used for leader election amongst masters
+    template:
+      src: "./templates/marathon.zk.j2"
+      dest: /etc/marathon/conf/zk
+      mode: 0644
+
+- hosts: tag_Name_mesos_slave
+  become: yes
+  tasks:
+
+  - name: Set mesos-slave IP
+    copy:
+      content: "{{ ansible_default_ipv4.address }}"
+      dest: /etc/mesos-slave/ip  
+      mode: 0644
+
+  - name: Set mesos-slave hostname
+    copy:
+      content: "{{ ansible_default_ipv4.address }}"
+      dest: /etc/mesos-slave/hostname  
+      mode: 0644  
+

@@ -1,0 +1,1 @@
+{% for host in mesos_masters %}{% if inventory_hostname==host %}{{ loop.index }}{% endif %}{% endfor %}

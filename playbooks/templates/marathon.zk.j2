@@ -1,0 +1,1 @@
+zk://{% for host in mesos_masters %}{{ hostvars[host]['ansible_eth0']['ipv4']['address'] }}{% if not loop.last %}:2181,{% endif %}{% endfor %}:2181/marathon

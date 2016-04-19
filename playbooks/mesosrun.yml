@@ -1,0 +1,41 @@
+---
+- hosts: tag_Name_mesos_master
+  become: yes
+  tasks:
+    - name: stop mesos-slave
+      service: name=mesos-slave state=stopped
+    - name: set mesos-slave to not autostart
+      copy:
+        content: "manual"
+        dest: /etc/init/mesos-slave.override
+        mode: 0644
+
+    - name: restart zookeeper
+      service: name=zookeeper state=restarted
+    - name: start mesos-master
+      service: name=mesos-master state=restarted
+    - name: start marathon
+      service: name=marathon state=restarted
+
+- hosts: tag_Name_mesos_slave
+  become: yes
+  tasks:
+    - name: stop zookeeper
+      service: name=zookeeper state=stopped
+    - name: set zookeeper to not autostart
+      copy:
+        content: "manual"
+        dest: /etc/init/zookeeper.override
+        mode: 0644
+
+    - name: stop mesos-master
+      service: name=mesos-master state=stopped
+    - name: set mesos-master to not autostart
+      copy:
+        content: "manual"
+        dest: /etc/init/mesos-master.override
+        mode: 0644
+
+    - name: start mesos-slave
+      service: name=mesos-slave state=restarted
+
